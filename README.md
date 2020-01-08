@@ -20,7 +20,7 @@ The dataset `FuelConsumptionCo2.csv` has these following columns:
 
 > ### Loading data : 
 
-```
+```python 3
 ''' Importing libraries '''
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -34,13 +34,13 @@ df.head() # first few rows of the dataset
 ```
 Here I have taken only `ENGINESIZE, CYLINDERS, FUELCONSUMPTION_CITY, FUELCONSUMPTION_HWY` and `FUELCONSUMPTION_COMB` as independent variables and `CO2EMISSIONS` is dependent. Goal of this model is to predict `CO2EMISSIONS` for given values of other attrs.
 
-```
+```python 3
 cdf = df[['ENGINESIZE','CYLINDERS','FUELCONSUMPTION_CITY','FUELCONSUMPTION_HWY','FUELCONSUMPTION_COMB','CO2EMISSIONS']]
 cdf.head(5)
 ```
 
 Now, lets check dependency of `CO2EMISSIONS` on `ENGINESIZE`:
-```
+```python 3
 plt.scatter(cdf.ENGINESIZE, cdf.CO2EMISSIONS,  color='blue')
 plt.xlabel("Engine size")
 plt.ylabel("Emission")
@@ -55,7 +55,7 @@ There need a way to evaluate how good my model is, and for that we need data whi
 splitting the dataset into two parts: one part will be used for training the model and other part for testing it. For splitting, I have
 used boolean mask indexing on the dataframe to get `train`. The rest of it will be testing data `test`.
 
-```
+```python 3
 msk = np.random.rand(len(df)) < 0.8
 train = cdf[msk]
 test = cdf[~msk]
@@ -63,7 +63,7 @@ test = cdf[~msk]
 We need to check if the data is taken randomly and not taking a part of dataset in `train` data. To check that, plotting `CO2EMISSIONS` of train data with `ENGINESIZE`. If the output is not scattered over the dataset, then we need to run again. When I ran it, it produced 
 the output as shown below:
 
-```
+```python 3
 plt.scatter(train.ENGINESIZE, train.CO2EMISSIONS,  color='blue')
 plt.xlabel("Engine size")
 plt.ylabel("Emission")
@@ -75,7 +75,7 @@ plt.show()
 Here we have multiple independent variables which predicts the `CO2EMISSION`. We will use `linear_model.LinearRegression()` from
 `sklearn` package to built the model.
 
-```
+```python 3
 from sklearn import linear_model
 regr = linear_model.LinearRegression()
 x = np.asanyarray(train[['ENGINESIZE','CYLINDERS','FUELCONSUMPTION_COMB']])
@@ -84,4 +84,18 @@ regr.fit (x, y)
 # The coefficients
 print ('Coefficients: ', regr.coef_)
 ```
-The *coefficient* and *intercept* are the parameters of the fit line. 
+The *coefficient* and *intercept* are the parameters of the fit hyper-plane. 
+
+
+> ### Prediction : 
+```python 3
+y_hat= regr.predict(test[['ENGINESIZE','CYLINDERS','FUELCONSUMPTION_COMB']])
+x = np.asanyarray(test[['ENGINESIZE','CYLINDERS','FUELCONSUMPTION_COMB']])
+y = np.asanyarray(test[['CO2EMISSIONS']])
+print("Residual sum of squares: %.2f"
+      % np.mean((y_hat - y) ** 2))
+
+# Explained variance score: 1 is perfect prediction
+print('Variance score: %.2f' % regr.score(x, y))
+```
+In my model, the *Variance score* came `0.86`. The best possible *variance score* is `1.0`.  
